@@ -36,6 +36,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://iot-final.leehan416.dev",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -43,3 +44,5 @@ app.add_middleware(
 )
 app.include_router(health.router)
 app.include_router(runners.router)
+app.include_router(health.router, prefix="/api")
+app.include_router(runners.router, prefix="/api")

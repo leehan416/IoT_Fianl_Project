@@ -12,7 +12,7 @@ type RunnerLocation = {
   received_at: string;
 };
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
 const defaultCenter: [number, number] = [36.10321, 129.38712];
 
 const runnerIcon = new L.Icon({

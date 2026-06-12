@@ -59,6 +59,20 @@ async def test_list_runners() -> None:
     assert response.json()[0]["runner_id"] == "7"
 
 
+async def test_list_runners_with_api_prefix() -> None:
+    app.dependency_overrides[get_runner_service] = lambda: FakeRunnerService()
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        response = await client.get("/api/runners")
+
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json()[0]["runner_id"] == "7"
+
+
 async def test_get_runner_404() -> None:
     app.dependency_overrides[get_runner_service] = lambda: FakeRunnerService()
 

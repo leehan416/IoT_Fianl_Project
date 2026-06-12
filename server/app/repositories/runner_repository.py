@@ -23,7 +23,10 @@ class RunnerRepository:
         self._redis = redis_client
 
     async def save_location(self, location: RunnerLocation) -> None:
-        await self._redis.set(self._location_key(location.runner_id), location.model_dump_json())
+        await self._redis.set(
+            self._location_key(location.runner_id),
+            location.model_dump_json(),
+        )
         await self._redis.sadd("runners", location.runner_id)
 
     async def get_location(self, runner_id: str) -> RunnerLocation | None:

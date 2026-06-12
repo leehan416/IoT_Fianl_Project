@@ -6,15 +6,20 @@ React + Leaflet client for displaying runner locations from the FastAPI server w
 
 ```bash
 cd frontend
-cp .env.example .env
 npm install
 npm run dev
 ```
 
 Open `http://localhost:3000`.
 
+The API base URL is stored in `.env`:
+
+```text
+VITE_API_BASE_URL=https://iot-final.leehan416.dev/api/
+```
+
 The app polls:
 
 ```text
-GET http://localhost:8000/runners
+GET https://iot-final.leehan416.dev/api/runners
 ```
