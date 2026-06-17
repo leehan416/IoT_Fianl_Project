@@ -37,6 +37,21 @@ async def test_handle_gateway_payload_saves_forward_location() -> None:
     assert repository.saved == location
 
 
+async def test_handle_gateway_payload_saves_forward_data_location() -> None:
+    repository = FakeRepository()
+    service = RunnerService(repository)
+
+    location = await service.handle_gateway_payload(
+        "FORWARD_DATA,1,2,7,36.10321,129.38712,5.42,78,10,1,-91,7.2"
+    )
+
+    assert location is not None
+    assert location.runner_id == "7"
+    assert location.latitude == 36.10321
+    assert location.longitude == 129.38712
+    assert repository.saved == location
+
+
 async def test_handle_gateway_payload_saves_gateway_json_location() -> None:
     repository = FakeRepository()
     service = RunnerService(repository)

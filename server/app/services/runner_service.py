@@ -75,7 +75,7 @@ class RunnerService:
 
     def _parse_forward_csv(self, payload: str) -> RunnerLocation | None:
         fields = [field.strip() for field in payload.split(",")]
-        if len(fields) != 11 or fields[0] != "FORWARD":
+        if len(fields) < 8 or fields[0] not in {"FORWARD", "FORWARD_DATA"}:
             return None
 
         try:
