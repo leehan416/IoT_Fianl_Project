@@ -7,6 +7,8 @@ from pydantic import ValidationError
 from app.models.runner import RunnerLocation, RunnerRanking
 from app.repositories.runner_repository import RunnerRepository
 
+MAX_LOCATION_JUMP_M = 20_000
+
 
 class RunnerService:
     def __init__(self, repository: RunnerRepository) -> None:
@@ -17,6 +19,7 @@ class RunnerService:
         if location is None:
             return None
 
+        await self._reset_path_if_location_jumped(location)
         await self._repository.save_location(location)
         return location
 
@@ -25,6 +28,7 @@ class RunnerService:
         if location is None:
             return None
 
+        await self._reset_path_if_location_jumped(location)
         await self._repository.save_location(location)
         return location
 
@@ -149,6 +153,20 @@ class RunnerService:
             )
         except (KeyError, TypeError, ValueError, ValidationError):
             return None
+
+    async def _reset_path_if_location_jumped(self, location: RunnerLocation) -> None:
+        previous = await self._repository.get_location(location.runner_id)
+        if previous is None:
+            return
+
+        distance_m = _haversine_m(
+            previous.latitude,
+            previous.longitude,
+            location.latitude,
+            location.longitude,
+        )
+        if distance_m >= MAX_LOCATION_JUMP_M:
+            await self._repository.clear_path(location.runner_id)
 
     @staticmethod
     def _calculate_distance_m(path: list[RunnerLocation]) -> float:

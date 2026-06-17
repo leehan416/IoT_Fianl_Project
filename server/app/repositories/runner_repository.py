@@ -26,6 +26,9 @@ class RedisLike(Protocol):
     async def zrange(self, key: str, start: int, end: int) -> list[str] | list[bytes]:
         ...
 
+    async def delete(self, *keys: str) -> object:
+        ...
+
     async def expire(self, key: str, seconds: int) -> object:
         ...
 
@@ -91,6 +94,9 @@ class RunnerRepository:
                 continue
 
         return path
+
+    async def clear_path(self, runner_id: str) -> None:
+        await self._redis.delete(self._path_key(runner_id))
 
     @staticmethod
     def _location_key(runner_id: str) -> str:

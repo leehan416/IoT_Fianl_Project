@@ -42,6 +42,12 @@ class FakeRedis:
             end = len(values) - 1
         return [member for _, member in values[start : end + 1]]
 
+    async def delete(self, *keys: str) -> None:
+        for key in keys:
+            self.values.pop(key, None)
+            self.sorted_sets.pop(key, None)
+            self.expires.pop(key, None)
+
     async def expire(self, key: str, seconds: int) -> None:
         self.expires[key] = seconds
 
@@ -90,6 +96,22 @@ async def test_repository_returns_runner_path_in_order() -> None:
     await repository.save_location(second)
 
     assert await repository.get_path("7") == [first, second]
+
+
+async def test_repository_clears_runner_path() -> None:
+    redis = FakeRedis()
+    repository = RunnerRepository(redis)
+    location = RunnerLocation(
+        runner_id="7",
+        latitude=36.10321,
+        longitude=129.38712,
+        received_at="2026-06-13T00:00:00+00:00",
+    )
+
+    await repository.save_location(location)
+    await repository.clear_path("7")
+
+    assert await repository.get_path("7") == []
 
 
 async def test_repository_removes_stale_runner_from_set_when_location_expired() -> None:

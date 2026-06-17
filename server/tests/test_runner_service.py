@@ -6,6 +6,7 @@ class FakeRepository:
     def __init__(self) -> None:
         self.saved = None
         self.paths: dict[str, list[RunnerLocation]] = {}
+        self.cleared_paths: list[str] = []
 
     async def save_location(self, location):
         self.saved = location
@@ -20,6 +21,10 @@ class FakeRepository:
 
     async def get_path(self, runner_id: str):
         return self.paths.get(runner_id, [])
+
+    async def clear_path(self, runner_id: str):
+        self.cleared_paths.append(runner_id)
+        self.paths[runner_id] = []
 
 
 async def test_handle_gateway_payload_saves_forward_location() -> None:
@@ -154,3 +159,21 @@ async def test_get_runner_rankings_orders_by_distance() -> None:
     assert [ranking.runner_id for ranking in rankings] == ["8", "7"]
     assert rankings[0].rank == 1
     assert rankings[0].distance_m > rankings[1].distance_m
+
+
+async def test_update_resets_runner_path_when_location_jumps_over_20km() -> None:
+    repository = FakeRepository()
+    repository.saved = RunnerLocation(
+        runner_id="7",
+        latitude=36.10321,
+        longitude=129.38712,
+        received_at="2026-06-16T00:00:00+00:00",
+    )
+    service = RunnerService(repository)
+
+    location = await service.handle_gateway_payload(
+        "FORWARD,1,2,7,36.40321,129.38712,5.42,78,10,-91,7.2"
+    )
+
+    assert location is not None
+    assert repository.cleared_paths == ["7"]
